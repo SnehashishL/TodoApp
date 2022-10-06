@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/App/models"
+	"github.com/TodoApp/models"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )

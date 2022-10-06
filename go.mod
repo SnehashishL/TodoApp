@@ -1,4 +1,4 @@
-module github.com/App
+module github.com/TodoApp
 
 go 1.19
 
