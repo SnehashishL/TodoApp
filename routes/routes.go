@@ -16,17 +16,20 @@ func RouteInit() *mux.Router {
 
 	// Route handles & endpoints
 
-	// Get all movies
+	// Get all tasks
 	router.HandleFunc("/tasks/", AllTasks).Methods("GET")
 
-	// Create a movie
+	// Create a task
 	router.HandleFunc("/addTask/", CreateTask).Methods("POST")
 
-	// Delete a specific movie by the movieID
+	// Delete a specific task by the taskID
 	router.HandleFunc("/deleteTask/{taskid}", DeleteTask).Methods("DELETE")
 
-	// Delete all movies
+	// Delete all
 	router.HandleFunc("/deleteAll/", DeleteAll).Methods("DELETE")
+
+	// Update a task
+	router.HandleFunc("/updateTask/{taskid}", UpdateTask).Methods("PUT")
 
 	return router
 }
@@ -148,6 +151,32 @@ func DeleteAll(w http.ResponseWriter, r *http.Request) {
 	printMessage("All tasks have been deleted successfully!")
 
 	var response = JsonResponse{Type: "success", Message: "All tasks have been deleted successfully!"}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func UpdateTask(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	taskName := r.FormValue("taskname")
+	taskID := params["taskid"]
+
+	var response = JsonResponse{}
+
+	if taskID == "" {
+		response = JsonResponse{Type: "error", Message: "You are missing taskID parameter."}
+	} else {
+		db := models.SetupDB()
+
+		printMessage("Updating Task in DB")
+
+		fmt.Println("Updating new task with ID: " + taskID + " and name: " + taskName)
+
+		_, err := db.Exec("UPDATE todos SET taskname = $1 where taskID = $2", taskName, taskID)
+
+		CheckErr(err)
+
+		response = JsonResponse{Type: "success", Message: "The task has been updated successfully!"}
+	}
 
 	json.NewEncoder(w).Encode(response)
 }
