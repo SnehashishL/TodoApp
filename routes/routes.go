@@ -19,6 +19,9 @@ func RouteInit() *mux.Router {
 	// Get all tasks
 	router.HandleFunc("/tasks/", AllTasks).Methods("GET")
 
+	// Get task by ID
+	router.HandleFunc("/myTask/{taskid}", GetTask).Methods("GET")
+
 	// Create a task
 	router.HandleFunc("/addTask/", CreateTask).Methods("POST")
 
@@ -84,6 +87,35 @@ func AllTasks(w http.ResponseWriter, r *http.Request) {
 	var response = JsonResponse{Type: "success", Data: tasks}
 
 	json.NewEncoder(w).Encode(response)
+}
+
+// Get Task by ID
+func GetTask(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	taskID := params["taskid"]
+
+	db := models.SetupDB()
+
+	printMessage("Getting ToDo with specified id ...")
+
+	row := db.QueryRow("SELECT * FROM todos WHERE taskID = $1", taskID)
+
+	var task []Task
+	var id int
+	var taskid string
+	var taskname string
+
+	err := row.Scan(&id, &taskid, &taskname)
+
+	CheckErr(err)
+
+	task = append(task, Task{TaskID: taskid, TaskName: taskname})
+
+	var response = JsonResponse{Type: "success", Data: task}
+
+	json.NewEncoder(w).Encode(response)
+
 }
 
 // Add task to db
